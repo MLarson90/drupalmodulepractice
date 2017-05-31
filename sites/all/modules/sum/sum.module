@@ -1,0 +1,151 @@
+<?php
+
+ function sum_menu(){
+   $items = array();
+   $items['sum'] = array(
+     'title' => "Calculate Sum",
+     'type' => MENU_NORMAL_ITEM,
+     'access callback' => TRUE,
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('sum_form'),
+   );
+   $items['sum_success_page'] = array(
+     'title' => "Success",
+     'page callback' => 'sum_success',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['ping_pong'] = array(
+     'title' => 'Ping Pong Problem',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('ping_pong_form'),
+     'access callback' => TRUE,
+     'type' => MENU_NORMAL_ITEM,
+   );
+   $items['ping_pong_success_page'] = array(
+     'title' => "Success",
+     'page callback' => 'ping_pong_success',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['clock'] = array(
+     'title' => 'Clock',
+     'type' => MENU_NORMAL_ITEM,
+     'access callback' =>TRUE,
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('clock_form'),
+   );
+   $items['clock_success_page'] = array(
+     'title' => "Success",
+     'page callback' => 'clock_success',
+     'access callback' =>TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   return $items;
+ }
+
+ function sum_form(){
+   $form = array();
+   $form['left_number'] = array(
+     '#title' => 'Left Number',
+     '#type' => 'textfield',
+     '#description' => t('Enter Number'),
+   );
+
+   $form['right_number'] = array(
+     '#title' => 'Right Number',
+     '#type' => 'textfield',
+     '#description' => t('Enter Nother Number'),
+   );
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'Calculate',
+   );
+   return $form;
+ }
+ function sum_form_submit($form, &$form_state){
+   $first_number = $form_state['values']['left_number'];
+   $second_number = $form_state['values']['right_number'];
+   $sum = $first_number + $second_number;
+   $_SESSION['sum_output'] = $sum;
+   $form_state['redirect'] = 'sum_success_page';
+ }
+ function sum_success(){
+   $answer = $_SESSION['sum_output'];
+   return $answer . " you did it!";
+ }
+
+ function ping_pong_form(){
+   $form['count_goal'] = array(
+     '#title' => 'Count goal',
+     '#type' => 'textfield',
+     '#description' => t('Do it, I dare you'),
+   );
+   $form['submit'] = array(
+     '#type'=> 'submit',
+     '#value' => 'Go',
+   );
+   return $form;
+ }
+ function clock_form(){
+   $form = array();
+   $form['hour'] = array(
+     '#title' => 'Got the time?',
+     '#type' => 'textfield',
+     '#description' => 'Enter hour',
+   );
+   $form['minute'] = array(
+     '#type' => 'textfield',
+     '#description' => 'Enter minute',
+   );
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'Check',
+   );
+   return $form;
+ }
+
+ function ping_pong_form_submit($form, &$form_state){
+   $count_max = $form_state['values']['count_goal'];
+   $pingpong_output = array();
+   for($i=1; $i<= $count_max; $i++){
+     if($i % 15 === 0){
+       array_push($pingpong_output, "ping-pong");
+     }elseif($i%5 ===0){
+       array_push($pingpong_output, "pong");
+     }elseif($i%3===0){
+       array_push($pingpong_output, "ping");
+     }else{
+       array_push($pingpong_output, $i);
+     }
+   }
+   $_SESSION['ping_pong_output'] = $pingpong_output;
+   $form_state['redirect'] = 'ping_pong_success_page';
+ }
+ function clock_form_submit($form, &$form_state){
+   $count_hour = $form_state['values']['hour'];
+   $count_minute = $form_state['values']['minute'];
+   $minute_angle = $count_minute * 6;
+   $hour_angle = $count_hour * 30 + ($minute_angle/360 *30);
+   $result = null;
+   if($hour_angle > $minute_angle){
+     $result = $hour_angle - $minute_angle;
+   }else{
+     $result = $minute_angle - $hour_angle;
+   }
+   $_SESSION['clock_val'] = $result;
+   $form_state['redirect'] = 'clock_success_page';
+ }
+
+ function ping_pong_success(){
+   $output = '<ul>';
+   foreach($_SESSION['ping_pong_output'] as $value){
+     $output .= '<li>' . $value . '</li>';
+   }
+   $output .= '</ul>';
+   return $output;
+ }
+ function clock_success(){
+   $output = $_SESSION['clock_val'];
+   return "<h1>" . $output . " Degrees</h1>";
+ }
